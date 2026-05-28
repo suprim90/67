@@ -7,11 +7,11 @@
 
   <!-- Open Graph / Social Preview -->
   <meta property="og:title" content="🫲🏼 Find the 67 🫱🏼 — Can you beat the leaderboard?">
-  <meta property="og:description" content="1,200 numbers. One is the 67. Clock is ticking. How fast are you? #67Challenge">
+  <meta property="og:description" content="670 numbers. One is the 67. Clock is ticking. How fast are you? #67Challenge">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="🫲🏼 Find the 67 🫱🏼">
-  <meta name="twitter:description" content="1,200 numbers. One is the 67. Clock is ticking. #67Challenge #DootDoot">
+  <meta name="twitter:description" content="670 numbers. One is the 67. Clock is ticking. #67Challenge #DootDoot">
   <meta name="theme-color" content="#0d0d0d">
 
   <style>
@@ -40,42 +40,6 @@
       background: #ff6a00;
       pointer-events: none;
       z-index: 0;
-    }
-
-    /* ── HINT ── */
-    #hint-btn {
-      position: fixed;
-      top: 14px;
-      right: 14px;
-      background: rgba(255,106,0,0.12);
-      border: 0.5px solid rgba(255,106,0,0.3);
-      color: rgba(255,106,0,0.7);
-      font-size: 11px;
-      font-weight: 700;
-      padding: 7px 13px;
-      border-radius: 20px;
-      cursor: pointer;
-      z-index: 50;
-      transition: all 0.2s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    #hint-btn:hover, #hint-btn:active { background: rgba(255,106,0,0.25); color: #ff6a00; }
-
-    #hint-msg {
-      display: none;
-      position: fixed;
-      top: 50px;
-      right: 14px;
-      background: #1c1c1c;
-      border: 0.5px solid rgba(255,106,0,0.35);
-      color: rgba(255,255,255,0.65);
-      font-size: 12px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      z-index: 50;
-      max-width: 170px;
-      text-align: right;
-      line-height: 1.6;
     }
 
     /* ── HEADER ── */
@@ -211,7 +175,6 @@
       color: rgba(255,255,255,0.2);
       padding: 4px 3px;
       font-variant-numeric: tabular-nums;
-      user-select: none;
       cursor: pointer;
       min-width: 30px;
       text-align: center;
@@ -220,6 +183,7 @@
       transition: color 0.07s;
       -webkit-tap-highlight-color: transparent;
     }
+    .num::before { content: attr(data-n); }
     @media (min-width: 640px) {
       .num { font-size: 9px; min-width: 21px; padding: 1.5px 2px; }
     }
@@ -443,9 +407,6 @@
   <div class="bg-ball" style="width:300px;height:300px;top:-80px;right:-60px;position:fixed;"></div>
   <div class="bg-ball" style="width:200px;height:200px;bottom:-50px;left:-40px;position:fixed;"></div>
 
-  <button id="hint-btn" onclick="doHint()">HINT 👀</button>
-  <div id="hint-msg"></div>
-
   <div id="header">
     <div id="crown">
       <strong id="crown-count">—</strong> <em>people already played ·</em>
@@ -459,7 +420,7 @@
         <span class="hand hand-r">🫱🏼</span>
       </span>
     </div>
-    <div id="sub">1,200 numbers · 🎲 new position every game · clock is ticking</div>
+    <div id="sub">670 numbers · 🎲 new position every game · clock is ticking</div>
   </div>
 
   <div id="stats-row">
@@ -582,12 +543,11 @@
   }
 
   /* ─── GAME STATE ─── */
-  const isMobile = window.innerWidth < 640;
-  const TOTAL    = isMobile ? 1200 : 1800;
+  const TOTAL    = 670;
   const SITE_URL = window.location.href.split('?')[0];
 
   let targetIdx = -1, startTime = null, elapsed = 0, timerIv = null;
-  let found = false, misses = 0, hintOpen = false;
+  let found = false, misses = 0;
   let personalBest = null, playerName = null, currentResult = null;
   let dbLeaderboard = []; /* live data from Supabase */
   let playerRowId  = null;
@@ -606,8 +566,7 @@
   const MISS_VIBES = [
     [1,  'that ain\'t it chief 💀'],
     [3,  'bro is cooked fr 😭'],
-    [6,  'you need the hint fam 😅'],
-    [10, 'okay at this point... HINT 👆']
+    [6,  'you need the hint fam 😅']
   ];
 
   /* ─── HELPERS ─── */
@@ -652,20 +611,18 @@
 
   /* ─── BUILD GAME ─── */
   function build() {
-    found = false; misses = 0; startTime = null; elapsed = 0; hintOpen = false;
+    found = false; misses = 0; startTime = null; elapsed = 0;
     clearInterval(timerIv);
 
     document.getElementById('t-sec').textContent   = '0.0';
     document.getElementById('t-wrong').textContent = '0';
     document.getElementById('vibe-line').textContent = '';
     document.getElementById('overlay').classList.remove('visible');
-    document.getElementById('hint-msg').style.display = 'none';
-    document.getElementById('hint-btn').textContent = 'HINT 👀';
     document.getElementById('phase1').style.display = 'flex';
     document.getElementById('phase2').style.display = 'none';
     document.getElementById('name-input').value = playerName || '';
     document.getElementById('ne-submit').disabled = false;
-    if (isMobile) document.getElementById('scroll-hint').textContent = 'scroll to search · tap the 67 when you find it';
+    if (window.innerWidth < 640) document.getElementById('scroll-hint').textContent = 'scroll to search · tap the 67 when you find it';
 
     targetIdx = Math.floor(Math.random() * TOTAL);
     const grid = document.getElementById('grid');
@@ -675,7 +632,7 @@
       let n = (i === targetIdx) ? '67' : (() => { let x; do { x = rndNum(); } while (x === '67'); return x; })();
       const el = document.createElement('span');
       el.className = 'num' + (i === targetIdx ? ' target' : '');
-      el.textContent = n;
+      el.dataset.n = n;
       el.addEventListener('click', e => handleClick(e, i, el));
       frag.appendChild(el);
     }
@@ -846,30 +803,12 @@
     await submitToSupabase(playerName);
   }
 
-  /* ─── HINT ─── */
-  function doHint() {
-    hintOpen = !hintOpen;
-    const hm = document.getElementById('hint-msg');
-    if (hintOpen) {
-      const row = Math.floor(targetIdx / 30);
-      const col = targetIdx % 30;
-      const v = row < 20 ? 'top third' : row < 40 ? 'middle' : 'bottom third';
-      const h = col < 10 ? 'left side' : col < 20 ? 'center' : 'right side';
-      hm.textContent = '🏀 ' + v + ', ' + h + '.';
-      hm.style.display = 'block';
-      document.getElementById('hint-btn').textContent = 'HIDE 👀';
-    } else {
-      hm.style.display = 'none';
-      document.getElementById('hint-btn').textContent = 'HINT 👀';
-    }
-  }
-
   /* ─── SHARE ─── */
   function shareText(withResult) {
     if (withResult && currentResult) {
       return 'I found the 67 in ' + currentResult.time.toFixed(1) + 's (rank ' + currentResult.rank + ') 🫲🏼67🫱🏼 Can you beat me? ' + SITE_URL + ' #67Challenge #FindThe67 #DootDoot';
     }
-    return 'Can you find the 67? 🫲🏼67🫱🏼 1,200 numbers hidden — how fast? ' + SITE_URL + ' #67Challenge #DootDoot';
+    return 'Can you find the 67? 🫲🏼67🫱🏼 670 numbers hidden — how fast? ' + SITE_URL + ' #67Challenge #DootDoot';
   }
 
   function shareWA()       { window.open('https://wa.me/?text=' + encodeURIComponent(shareText(false))); }
@@ -894,6 +833,14 @@
   function copyResult() { copyBtn('copy-btn2', shareText(true)); }
 
   function restart() { build(); }
+
+  /* ─── BLOCK CTRL+F / CMD+F ─── */
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
 
   /* ─── INIT ─── */
   async function init() {
