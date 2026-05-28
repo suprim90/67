@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Find the 🫲🏼67🫱🏼 Challenge</title>
+
+  <!-- Open Graph / Social Preview -->
+  <meta property="og:title" content="🫲🏼 Find the 67 🫱🏼 — Can you beat the leaderboard?">
+  <meta property="og:description" content="1,200 numbers. One is the 67. Clock is ticking. How fast are you? #67Challenge">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="🫲🏼 Find the 67 🫱🏼">
+  <meta name="twitter:description" content="1,200 numbers. One is the 67. Clock is ticking. #67Challenge #DootDoot">
+  <meta name="theme-color" content="#0d0d0d">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d0d0d;
+      min-height: 100vh;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      overscroll-behavior: none;
+    }
+
+    #app {
+      background: #0d0d0d;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .bg-ball {
+      position: fixed;
+      border-radius: 50%;
+      opacity: 0.04;
+      background: #ff6a00;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── HINT ── */
+    #hint-btn {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      background: rgba(255,106,0,0.12);
+      border: 0.5px solid rgba(255,106,0,0.3);
+      color: rgba(255,106,0,0.7);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 7px 13px;
+      border-radius: 20px;
+      cursor: pointer;
+      z-index: 50;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #hint-btn:hover, #hint-btn:active { background: rgba(255,106,0,0.25); color: #ff6a00; }
+
+    #hint-msg {
+      display: none;
+      position: fixed;
+      top: 50px;
+      right: 14px;
+      background: #1c1c1c;
+      border: 0.5px solid rgba(255,106,0,0.35);
+      color: rgba(255,255,255,0.65);
+      font-size: 12px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      z-index: 50;
+      max-width: 170px;
+      text-align: right;
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    #header {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 20px 14px 0;
+    }
+
+    #crown {
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 10px;
+      line-height: 1.6;
+      padding: 0 50px 0 0;
+    }
+    #crown strong { color: #ff6a00; font-weight: 700; }
+    #crown em { font-style: normal; color: rgba(255,255,255,0.55); }
+
+    #main-title {
+      font-size: clamp(28px, 8vw, 38px);
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -1px;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      line-height: 1.2;
+    }
+    .title-static { white-space: nowrap; margin-right: 8px; }
+    .title-gesture { display: flex; align-items: center; gap: 3px; }
+    .hand {
+      display: inline-block;
+      font-size: clamp(24px, 7vw, 32px);
+      line-height: 1;
+    }
+
+    @keyframes goDown {
+      0%   { transform: translateY(-12px); }
+      50%  { transform: translateY(12px);  }
+      100% { transform: translateY(-12px); }
+    }
+    @keyframes goUp {
+      0%   { transform: translateY(12px);  }
+      50%  { transform: translateY(-12px); }
+      100% { transform: translateY(12px);  }
+    }
+    .hand-l { animation: goDown 0.75s ease-in-out infinite; }
+    .hand-r { animation: goUp   0.75s ease-in-out infinite; }
+
+    .n67 { color: #ff6a00; font-style: italic; letter-spacing: -2px; padding: 0 3px; }
+
+    #sub { font-size: 11px; color: rgba(255,255,255,0.22); letter-spacing: 0.3px; }
+
+    /* ── STATS ── */
+    #stats-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0;
+      padding: 10px 8px 4px;
+      position: relative;
+      z-index: 10;
+    }
+    .sbox {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4px 12px;
+      border-right: 0.5px solid rgba(255,255,255,0.07);
+    }
+    .sbox:last-child { border-right: none; }
+    .sval {
+      font-size: clamp(18px, 5vw, 22px);
+      font-weight: 900;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .sval.orange { color: #ff6a00; }
+    .sval.gold   { color: #f5c542; }
+    .slbl {
+      font-size: 9px;
+      color: rgba(255,255,255,0.28);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 2px;
+    }
+
+    #vibe-line {
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255,255,255,0.18);
+      padding: 3px 14px 3px;
+      min-height: 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    #scroll-hint {
+      text-align: center;
+      font-size: 10px;
+      color: rgba(255,106,0,0.3);
+      padding: 0 14px 4px;
+      min-height: 18px;
+    }
+
+    /* ── GRID ── */
+    #grid-wrap {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      max-height: 52vh;
+      position: relative;
+      z-index: 5;
+    }
+    @media (min-width: 640px) {
+      #grid-wrap { max-height: none; overflow-y: visible; }
+    }
+
+    #grid {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 4px 6px;
+      justify-content: flex-start;
+    }
+
+    .num {
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.2);
+      padding: 4px 3px;
+      font-variant-numeric: tabular-nums;
+      user-select: none;
+      cursor: pointer;
+      min-width: 30px;
+      text-align: center;
+      line-height: 1.5;
+      border-radius: 3px;
+      transition: color 0.07s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @media (min-width: 640px) {
+      .num { font-size: 9px; min-width: 21px; padding: 1.5px 2px; }
+    }
+    .num:hover, .num:active { color: rgba(255,255,255,0.55); }
+
+    .num.miss {
+      color: rgba(255,50,50,0.6) !important;
+      animation: shk 0.25s ease;
+    }
+    @keyframes shk {
+      0%   { transform: translateX(0); }
+      25%  { transform: translateX(-4px); }
+      75%  { transform: translateX(4px); }
+      100% { transform: translateX(0); }
+    }
+
+    .num.found {
+      color: #ff6a00 !important;
+      background: rgba(255,106,0,0.2);
+      font-weight: 900;
+      animation: bigpop 0.55s cubic-bezier(0.22,1.5,0.5,1) forwards;
+    }
+    @keyframes bigpop {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(2.5); }
+      70%  { transform: scale(1.7); }
+      100% { transform: scale(1); }
+    }
+
+    /* ── FOOTER ── */
+    #fc {
+      font-size: 10px;
+      color: rgba(255,255,255,0.12);
+      text-align: center;
+      padding: 5px 14px 2px;
+    }
+
+    #share-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px 16px;
+      flex-wrap: wrap;
+    }
+    .sh-label {
+      font-size: 10px;
+      color: rgba(255,255,255,0.2);
+      width: 100%;
+      text-align: center;
+      margin-bottom: 2px;
+    }
+    .sh-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      border: 0.5px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.4);
+      transition: all 0.18s;
+      -webkit-tap-highlight-color: transparent;
+      font-family: inherit;
+    }
+    .sh-btn:hover, .sh-btn:active { background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.8); }
+    .sh-btn.wa { border-color: rgba(37,211,102,0.25); color: rgba(37,211,102,0.65); }
+    .sh-btn.wa:hover, .sh-btn.wa:active { background: rgba(37,211,102,0.1); color: #25D366; }
+    .sh-btn.x:hover, .sh-btn.x:active { color: #fff; border-color: rgba(255,255,255,0.35); }
+    .sh-btn.fb { border-color: rgba(24,119,242,0.25); color: rgba(24,119,242,0.65); }
+    .sh-btn.fb:hover, .sh-btn.fb:active { background: rgba(24,119,242,0.1); color: #1877F2; }
+
+    /* ── OVERLAY ── */
+    #overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.94);
+      z-index: 200;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 24px 16px 40px;
+    }
+    #overlay.visible {
+      display: flex;
+      animation: swoopIn 0.4s cubic-bezier(0.22,1.3,0.5,1);
+    }
+    @keyframes swoopIn {
+      from { opacity: 0; transform: scale(0.88) translateY(16px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    #phase1, #phase2 {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .confetti-bar { font-size: clamp(20px, 6vw, 26px); letter-spacing: 8px; margin-bottom: 8px; }
+    .win-label { font-size: 11px; font-weight: 700; letter-spacing: 4px; color: rgba(255,106,0,0.7); text-transform: uppercase; margin-bottom: 3px; }
+    .win-big-time { font-size: clamp(54px, 15vw, 70px); font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; line-height: 1; }
+    .win-unit { font-size: 11px; color: rgba(255,255,255,0.28); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
+
+    .chips { display: flex; gap: 10px; margin-bottom: 10px; }
+    .chip { background: rgba(255,255,255,0.07); border-radius: 10px; padding: 8px 14px; text-align: center; }
+    .chip-val { font-size: 18px; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
+    .chip-lbl { font-size: 9px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 1px; }
+
+    .win-rating { font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 7px; text-align: center; line-height: 1.5; max-width: 290px; }
+    .pb-banner { font-size: 12px; font-weight: 700; letter-spacing: 1px; color: #f5c542; margin-bottom: 14px; min-height: 16px; }
+
+    /* Name entry */
+    #name-entry { width: 100%; max-width: 300px; text-align: center; }
+    #ne-label { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 9px; }
+    #ne-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    #name-input {
+      flex: 1;
+      background: rgba(255,255,255,0.07);
+      border: 0.5px solid rgba(255,106,0,0.4);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      font-size: 15px;
+      font-family: inherit;
+      font-weight: 700;
+      outline: none;
+    }
+    #name-input:focus { border-color: #ff6a00; }
+    #name-input::placeholder { color: rgba(255,255,255,0.2); font-weight: 400; }
+    #ne-submit {
+      background: #ff6a00;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.2s;
+    }
+    #ne-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    #ne-skip { background: none; border: none; color: rgba(255,255,255,0.22); font-size: 12px; cursor: pointer; padding: 4px; font-family: inherit; }
+    #ne-skip:hover { color: rgba(255,255,255,0.5); }
+
+    /* Leaderboard */
+    #lb-wrap { width: 100%; max-width: 380px; margin-bottom: 16px; }
+    #lb-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    #lb-title-lbl { font-size: 11px; font-weight: 900; letter-spacing: 2px; color: rgba(255,255,255,0.45); text-transform: uppercase; }
+    #lb-total { font-size: 10px; color: rgba(255,255,255,0.2); }
+    #lb-scroll { max-height: 210px; overflow-y: auto; border-radius: 10px; border: 0.5px solid rgba(255,255,255,0.07); }
+    #lb-scroll::-webkit-scrollbar { width: 3px; }
+    #lb-scroll::-webkit-scrollbar-thumb { background: rgba(255,106,0,0.3); border-radius: 4px; }
+    #lb-loading { text-align: center; padding: 20px; font-size: 12px; color: rgba(255,255,255,0.25); }
+
+    .lb-row { display: flex; align-items: center; gap: 7px; padding: 9px 12px; border-bottom: 0.5px solid rgba(255,255,255,0.05); font-size: 12px; }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-row.you { background: rgba(255,106,0,0.1); }
+    .lb-pos { font-weight: 900; color: rgba(255,255,255,0.3); min-width: 24px; font-size: 11px; }
+    .lb-pos.p1 { color: #f5c542; }
+    .lb-pos.p2 { color: #c0c0c0; }
+    .lb-pos.p3 { color: #cd7f32; }
+    .lb-name { flex: 1; color: rgba(255,255,255,0.7); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lb-name.you-name { color: #ff6a00; }
+    .lb-time { font-variant-numeric: tabular-nums; color: rgba(255,255,255,0.45); min-width: 40px; text-align: right; }
+    .lb-miss { color: rgba(255,255,255,0.22); min-width: 40px; text-align: right; font-size: 10px; }
+    .rk { font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; min-width: 24px; text-align: center; }
+    .rk-sp { background: rgba(255,106,0,0.2); color: #ff6a00; }
+    .rk-s  { background: rgba(245,197,66,0.18); color: #f5c542; }
+    .rk-a  { background: rgba(34,197,94,0.18); color: #22c55e; }
+    .rk-b  { background: rgba(59,130,246,0.18); color: #3b82f6; }
+    .rk-c  { background: rgba(107,114,128,0.18); color: #9ca3af; }
+    .rk-d  { background: rgba(55,65,81,0.25); color: #6b7280; }
+
+    .your-pos-txt { font-size: 12px; color: rgba(255,106,0,0.85); margin: 8px 0 14px; font-weight: 700; text-align: center; }
+
+    .overlay-share { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; justify-content: center; }
+    .btn-secondary {
+      background: transparent;
+      color: rgba(255,255,255,0.3);
+      border: 0.5px solid rgba(255,255,255,0.12);
+      padding: 13px 0;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      max-width: 300px;
+      transition: color 0.2s;
+      font-family: inherit;
+    }
+    .btn-secondary:hover { color: rgba(255,255,255,0.65); }
+
+    /* Pulse ring */
+    #pulse-ring {
+      position: fixed;
+      border-radius: 50%;
+      border: 3px solid #ff6a00;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+    }
+    @keyframes ringOut {
+      0%   { width: 0;     height: 0;     opacity: 1; }
+      100% { width: 130px; height: 130px; opacity: 0; }
+    }
+    .ring-go { animation: ringOut 0.7s ease-out forwards; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="bg-ball" style="width:300px;height:300px;top:-80px;right:-60px;position:fixed;"></div>
+  <div class="bg-ball" style="width:200px;height:200px;bottom:-50px;left:-40px;position:fixed;"></div>
+
+  <button id="hint-btn" onclick="doHint()">HINT 👀</button>
+  <div id="hint-msg"></div>
+
+  <div id="header">
+    <div id="crown">
+      <strong id="crown-count">—</strong> <em>people already played ·</em>
+      most took over 45s — <em>can you beat that?</em>
+    </div>
+    <div id="main-title">
+      <span class="title-static">FIND THE</span>
+      <span class="title-gesture">
+        <span class="hand hand-l">🫲🏼</span>
+        <span class="n67">67</span>
+        <span class="hand hand-r">🫱🏼</span>
+      </span>
+    </div>
+    <div id="sub">1,200 numbers · 🎲 new position every game · clock is ticking</div>
+  </div>
+
+  <div id="stats-row">
+    <div class="sbox"><div class="sval" id="t-sec">0.0</div><div class="slbl">seconds</div></div>
+    <div class="sbox"><div class="sval orange" id="t-wrong">0</div><div class="slbl">misses</div></div>
+    <div class="sbox"><div class="sval gold" id="pb-val">—</div><div class="slbl">your best</div></div>
+    <div class="sbox"><div class="sval" id="lb-rank-live">—</div><div class="slbl">lb rank</div></div>
+  </div>
+
+  <div id="vibe-line"></div>
+  <div id="scroll-hint"></div>
+  <div id="grid-wrap"><div id="grid"></div></div>
+  <div id="fc"></div>
+
+  <div id="share-bar">
+    <span class="sh-label">challenge a friend →</span>
+    <button class="sh-btn wa" onclick="shareWA()">💬 WhatsApp</button>
+    <button class="sh-btn x"  onclick="shareX()">✕ X</button>
+    <button class="sh-btn fb" onclick="shareFB()">f Facebook</button>
+    <button class="sh-btn cp" id="copy-btn" onclick="copyLink()">⎘ Copy</button>
+  </div>
+
+  <!-- OVERLAY -->
+  <div id="overlay">
+    <!-- Phase 1: Result + Name entry -->
+    <div id="phase1">
+      <div class="confetti-bar">🫲🏼 67 🫱🏼</div>
+      <div class="win-label">YOU FOUND IT</div>
+      <div class="win-big-time" id="win-time">0.0</div>
+      <div class="win-unit">SECONDS</div>
+      <div class="chips">
+        <div class="chip"><div class="chip-val" id="sc-time">—</div><div class="chip-lbl">time</div></div>
+        <div class="chip"><div class="chip-val" id="sc-miss">—</div><div class="chip-lbl">misses</div></div>
+        <div class="chip"><div class="chip-val" id="sc-rank">—</div><div class="chip-lbl">rank</div></div>
+      </div>
+      <div class="win-rating" id="win-rating"></div>
+      <div class="pb-banner" id="pb-banner"></div>
+      <div id="name-entry">
+        <div id="ne-label">Save your score to the leaderboard</div>
+        <div id="ne-row">
+          <input type="text" id="name-input" placeholder="your_tag_here" maxlength="18"
+                 autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <button id="ne-submit" onclick="submitName()">GO</button>
+        </div>
+        <button id="ne-skip" onclick="skipName()">skip</button>
+      </div>
+    </div>
+
+    <!-- Phase 2: Leaderboard -->
+    <div id="phase2" style="display:none;">
+      <div class="confetti-bar">🫲🏼 67 🫱🏼</div>
+      <div class="win-label">YOU FOUND IT</div>
+      <div class="win-big-time" id="win-time2">0.0</div>
+      <div class="win-unit">SECONDS</div>
+      <div class="win-rating" id="win-rating2" style="margin-bottom:12px;"></div>
+      <div id="lb-wrap">
+        <div id="lb-title-row">
+          <div id="lb-title-lbl">🏆 LEADERBOARD</div>
+          <div id="lb-total"></div>
+        </div>
+        <div id="lb-scroll"><div id="lb-loading">Loading scores...</div></div>
+        <div class="your-pos-txt" id="your-pos-txt"></div>
+      </div>
+      <div class="overlay-share">
+        <button class="sh-btn wa" onclick="shareWAResult()">💬 WhatsApp</button>
+        <button class="sh-btn x"  onclick="shareXResult()">✕ X</button>
+        <button class="sh-btn fb" onclick="shareFBResult()">f Facebook</button>
+        <button class="sh-btn cp" id="copy-btn2" onclick="copyResult()">⎘ Copy</button>
+      </div>
+      <button class="btn-secondary" onclick="restart()">PLAY AGAIN</button>
+    </div>
+  </div>
+
+  <div id="pulse-ring"></div>
+</div>
+
+<script>
+  /* ─── SUPABASE CONFIG ─── */
+  const SB_URL = 'https://eqqefjivewsaxbvhbzxe.supabase.co';
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxcWVmaml2ZXdzYXhidmhienhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MTkwMDYsImV4cCI6MjA5NTQ5NTAwNn0.ehKc7gdjlzwp5NO164PlRKD4DQbFwvM020fOuxLVOu4';
+  const SB_HEADERS = {
+    'apikey': SB_KEY,
+    'Authorization': 'Bearer ' + SB_KEY,
+    'Content-Type': 'application/json'
+  };
+  const BASE_COUNT = 94000; /* added to real DB count for social proof */
+
+  async function dbFetchLeaderboard() {
+    try {
+      const res = await fetch(
+        SB_URL + '/rest/v1/leaderboard?select=*&order=score.asc&limit=25',
+        { headers: SB_HEADERS }
+      );
+      if (!res.ok) return null;
+      return await res.json();
+    } catch(e) { return null; }
+  }
+
+  async function dbFetchCount() {
+    try {
+      const res = await fetch(
+        SB_URL + '/rest/v1/leaderboard?select=id',
+        { headers: { ...SB_HEADERS, 'Prefer': 'count=exact', 'Range-Unit': 'items', 'Range': '0-0' } }
+      );
+      const cr = res.headers.get('Content-Range');
+      if (cr && cr.includes('/')) return parseInt(cr.split('/')[1]) || 0;
+      return 0;
+    } catch(e) { return 0; }
+  }
+
+  async function dbInsertScore(name, time, misses, score, rank) {
+    try {
+      const res = await fetch(SB_URL + '/rest/v1/leaderboard', {
+        method: 'POST',
+        headers: { ...SB_HEADERS, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ name, time_seconds: time, misses, score, rank })
+      });
+      return res.ok;
+    } catch(e) { return false; }
+  }
+
+  /* ─── GAME STATE ─── */
+  const isMobile = window.innerWidth < 640;
+  const TOTAL    = isMobile ? 1200 : 1800;
+  const SITE_URL = window.location.href.split('?')[0];
+
+  let targetIdx = -1, startTime = null, elapsed = 0, timerIv = null;
+  let found = false, misses = 0, hintOpen = false;
+  let personalBest = null, playerName = null, currentResult = null;
+  let dbLeaderboard = []; /* live data from Supabase */
+  let playerRowId  = null;
+  let realCount    = 0;
+
+  const VIBES = [
+    'no cap the 67 is in there somewhere 💀',
+    'bro is it giving...',
+    'fr fr you won\'t find it that fast',
+    'LaMelo would\'ve found it already 🏀',
+    'stay locked in bestie',
+    'the 67 kid would\'ve spotted it by now 😭',
+    'DOOT DOOT where are you...',
+    'it\'s giving "where\'s waldo" fr'
+  ];
+  const MISS_VIBES = [
+    [1,  'that ain\'t it chief 💀'],
+    [3,  'bro is cooked fr 😭'],
+    [6,  'you need the hint fam 😅'],
+    [10, 'okay at this point... HINT 👆']
+  ];
+
+  /* ─── HELPERS ─── */
+  function calcScore(t, m) { return t + m * 5; }
+  function getRank(t, m) {
+    const s = calcScore(t, m);
+    if (s < 12)  return 'S+';
+    if (s < 22)  return 'S';
+    if (s < 40)  return 'A';
+    if (s < 70)  return 'B';
+    if (s < 120) return 'C';
+    return 'D';
+  }
+  function getRankClass(r) {
+    return { 'S+': 'rk-sp', 'S': 'rk-s', 'A': 'rk-a', 'B': 'rk-b', 'C': 'rk-c', 'D': 'rk-d' }[r] || 'rk-d';
+  }
+  function getRating(t, m) {
+    const s = calcScore(t, m);
+    if (s < 12)  return ['👑 GOAT behavior', 'Faster than LaMelo on a fast break. No cap.'];
+    if (s < 22)  return ['🔥 INSANE FR', 'Eyes built different. W rizz.'];
+    if (s < 40)  return ['⚡ HARD CARRY', 'You locked in. Sigma grindset.'];
+    if (s < 70)  return ['✅ NOT BAD NGL', 'Better than most. You ate, kinda.'];
+    if (s < 120) return ['😅 YOU SURVIVED', 'Took a minute but no rage quit. Respect.'];
+    return ['💀 COOKED', 'You found it eventually. Lowkey impressed fr.'];
+  }
+
+  function rndNum() {
+    const r = Math.random();
+    if (r < .07) return String(Math.floor(Math.random() * 9) + 1);
+    if (r < .35) return String(Math.floor(Math.random() * 90) + 10);
+    if (r < .70) return String(Math.floor(Math.random() * 900) + 100);
+    if (r < .88) return String(Math.floor(Math.random() * 9000) + 1000);
+    return String(Math.floor(Math.random() * 90000) + 10000);
+  }
+
+  /* ─── UI UPDATES ─── */
+  function updateCrown(count) {
+    const n = (BASE_COUNT + count).toLocaleString('en-US');
+    document.getElementById('crown-count').textContent = n;
+    document.getElementById('fc').textContent = n + ' people have already found it';
+  }
+
+  /* ─── BUILD GAME ─── */
+  function build() {
+    found = false; misses = 0; startTime = null; elapsed = 0; hintOpen = false;
+    clearInterval(timerIv);
+
+    document.getElementById('t-sec').textContent   = '0.0';
+    document.getElementById('t-wrong').textContent = '0';
+    document.getElementById('vibe-line').textContent = '';
+    document.getElementById('overlay').classList.remove('visible');
+    document.getElementById('hint-msg').style.display = 'none';
+    document.getElementById('hint-btn').textContent = 'HINT 👀';
+    document.getElementById('phase1').style.display = 'flex';
+    document.getElementById('phase2').style.display = 'none';
+    document.getElementById('name-input').value = playerName || '';
+    document.getElementById('ne-submit').disabled = false;
+    if (isMobile) document.getElementById('scroll-hint').textContent = 'scroll to search · tap the 67 when you find it';
+
+    targetIdx = Math.floor(Math.random() * TOTAL);
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < TOTAL; i++) {
+      let n = (i === targetIdx) ? '67' : (() => { let x; do { x = rndNum(); } while (x === '67'); return x; })();
+      const el = document.createElement('span');
+      el.className = 'num' + (i === targetIdx ? ' target' : '');
+      el.textContent = n;
+      el.addEventListener('click', e => handleClick(e, i, el));
+      frag.appendChild(el);
+    }
+    grid.appendChild(frag);
+
+    setTimeout(() => {
+      document.getElementById('vibe-line').textContent = VIBES[Math.floor(Math.random() * VIBES.length)];
+    }, 800);
+
+    startTimer();
+  }
+
+  function startTimer() {
+    startTime = Date.now();
+    timerIv = setInterval(() => {
+      if (!found) {
+        elapsed = (Date.now() - startTime) / 1000;
+        document.getElementById('t-sec').textContent = elapsed.toFixed(1);
+      }
+    }, 100);
+  }
+
+  /* ─── CLICK HANDLER ─── */
+  function handleClick(e, idx, el) {
+    if (found) return;
+    if (idx === targetIdx) {
+      found = true;
+      clearInterval(timerIv);
+      elapsed = (Date.now() - startTime) / 1000;
+      el.classList.add('found');
+      el.classList.remove('target');
+      ring(e.clientX, e.clientY);
+      setTimeout(() => showWin(), 520);
+    } else {
+      misses++;
+      document.getElementById('t-wrong').textContent = misses;
+      el.classList.add('miss');
+      setTimeout(() => el.classList.remove('miss'), 280);
+      const mv = MISS_VIBES.find(([t]) => misses === t);
+      if (mv) document.getElementById('vibe-line').textContent = mv[1];
+    }
+  }
+
+  /* ─── RING EFFECT ─── */
+  function ring(x, y) {
+    const r = document.getElementById('pulse-ring');
+    r.style.left = x + 'px';
+    r.style.top  = y + 'px';
+    r.className  = '';
+    void r.offsetWidth;
+    r.classList.add('ring-go');
+  }
+
+  /* ─── WIN SCREEN ─── */
+  function showWin() {
+    currentResult = {
+      time:   elapsed,
+      misses: misses,
+      score:  calcScore(elapsed, misses),
+      rank:   getRank(elapsed, misses)
+    };
+    const [badge, desc] = getRating(elapsed, misses);
+
+    document.getElementById('win-time').textContent  = elapsed.toFixed(1);
+    document.getElementById('sc-time').textContent   = elapsed.toFixed(1) + 's';
+    document.getElementById('sc-miss').textContent   = misses;
+    document.getElementById('sc-rank').textContent   = currentResult.rank;
+    document.getElementById('win-rating').textContent = badge + ' — ' + desc;
+
+    const isPB = !personalBest || currentResult.score < personalBest.score;
+    if (isPB) {
+      personalBest = currentResult;
+      document.getElementById('pb-val').textContent = elapsed.toFixed(1) + 's';
+    }
+    document.getElementById('pb-banner').textContent =
+      isPB ? '🏆 NEW PERSONAL BEST!' :
+      personalBest ? 'Personal best: ' + personalBest.time.toFixed(1) + 's' : '';
+
+    // If player already has a name, skip to leaderboard directly
+    if (playerName) {
+      submitToSupabase(playerName);
+    } else {
+      document.getElementById('overlay').classList.add('visible');
+    }
+  }
+
+  /* ─── SUPABASE SUBMIT ─── */
+  async function submitToSupabase(name) {
+    document.getElementById('ne-submit').disabled = true;
+    await dbInsertScore(name, currentResult.time, currentResult.misses, currentResult.score, currentResult.rank);
+    realCount++;
+    updateCrown(realCount);
+    await loadAndShowLeaderboard(name);
+  }
+
+  async function loadAndShowLeaderboard(name) {
+    document.getElementById('overlay').classList.add('visible');
+    document.getElementById('phase1').style.display = 'none';
+    document.getElementById('phase2').style.display = 'flex';
+    document.getElementById('win-time2').textContent = elapsed.toFixed(1);
+    const [badge, desc] = getRating(elapsed, misses);
+    document.getElementById('win-rating2').textContent = badge + ' — ' + desc;
+
+    // Show loading state
+    document.getElementById('lb-scroll').innerHTML = '<div id="lb-loading">Loading scores...</div>';
+
+    const data = await dbFetchLeaderboard();
+    if (data && data.length > 0) {
+      dbLeaderboard = data;
+      renderLeaderboard(name);
+    } else {
+      document.getElementById('lb-scroll').innerHTML = '<div id="lb-loading">Could not load scores.</div>';
+    }
+  }
+
+  function renderLeaderboard(playerNameToHighlight) {
+    const container = document.getElementById('lb-scroll');
+    container.innerHTML = '';
+    document.getElementById('lb-total').textContent = dbLeaderboard.length + ' players';
+
+    let playerPos = -1;
+
+    dbLeaderboard.forEach((entry, i) => {
+      const pos    = i + 1;
+      const isYou  = entry.name === playerNameToHighlight;
+      if (isYou && playerPos === -1) playerPos = pos;
+
+      const row  = document.createElement('div');
+      row.className = 'lb-row' + (isYou ? ' you' : '');
+
+      const pc = pos === 1 ? 'p1' : pos === 2 ? 'p2' : pos === 3 ? 'p3' : '';
+      const pt = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : '#' + pos;
+
+      row.innerHTML =
+        '<span class="lb-pos ' + pc + '">' + pt + '</span>' +
+        '<span class="lb-name' + (isYou ? ' you-name' : '') + '">' + entry.name + (isYou ? ' ◀' : '') + '</span>' +
+        '<span class="lb-time">' + Number(entry.time_seconds).toFixed(1) + 's</span>' +
+        '<span class="lb-miss">' + entry.misses + ' miss</span>' +
+        '<span class="rk ' + getRankClass(entry.rank) + '">' + entry.rank + '</span>';
+
+      container.appendChild(row);
+    });
+
+    if (playerPos > -1) {
+      document.getElementById('your-pos-txt').textContent = 'You are #' + playerPos + ' on the leaderboard 🔥';
+      document.getElementById('lb-rank-live').textContent = '#' + playerPos;
+      const rows = container.querySelectorAll('.lb-row');
+      if (rows[playerPos - 1]) {
+        setTimeout(() => rows[playerPos - 1].scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 150);
+      }
+    } else {
+      document.getElementById('your-pos-txt').textContent = '';
+    }
+  }
+
+  /* ─── NAME SUBMIT ACTIONS ─── */
+  async function submitName() {
+    const raw  = document.getElementById('name-input').value.trim();
+    const name = raw || 'anonymous_';
+    playerName = name;
+    document.getElementById('ne-submit').disabled = true;
+    document.getElementById('ne-submit').textContent = '...';
+    await submitToSupabase(name);
+  }
+
+  async function skipName() {
+    playerName = 'anonymous_';
+    await submitToSupabase(playerName);
+  }
+
+  /* ─── HINT ─── */
+  function doHint() {
+    hintOpen = !hintOpen;
+    const hm = document.getElementById('hint-msg');
+    if (hintOpen) {
+      const row = Math.floor(targetIdx / 30);
+      const col = targetIdx % 30;
+      const v = row < 20 ? 'top third' : row < 40 ? 'middle' : 'bottom third';
+      const h = col < 10 ? 'left side' : col < 20 ? 'center' : 'right side';
+      hm.textContent = '🏀 ' + v + ', ' + h + '.';
+      hm.style.display = 'block';
+      document.getElementById('hint-btn').textContent = 'HIDE 👀';
+    } else {
+      hm.style.display = 'none';
+      document.getElementById('hint-btn').textContent = 'HINT 👀';
+    }
+  }
+
+  /* ─── SHARE ─── */
+  function shareText(withResult) {
+    if (withResult && currentResult) {
+      return 'I found the 67 in ' + currentResult.time.toFixed(1) + 's (rank ' + currentResult.rank + ') 🫲🏼67🫱🏼 Can you beat me? ' + SITE_URL + ' #67Challenge #FindThe67 #DootDoot';
+    }
+    return 'Can you find the 67? 🫲🏼67🫱🏼 1,200 numbers hidden — how fast? ' + SITE_URL + ' #67Challenge #DootDoot';
+  }
+
+  function shareWA()       { window.open('https://wa.me/?text=' + encodeURIComponent(shareText(false))); }
+  function shareX()        { window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText(false))); }
+  function shareFB()       { window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(SITE_URL)); }
+  function shareWAResult() { window.open('https://wa.me/?text=' + encodeURIComponent(shareText(true))); }
+  function shareXResult()  { window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText(true))); }
+  function shareFBResult() { window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(SITE_URL) + '&quote=' + encodeURIComponent(shareText(true))); }
+
+  function copyBtn(id, text) {
+    if (!navigator.clipboard) return;
+    navigator.clipboard.writeText(text).then(() => {
+      const b = document.getElementById(id);
+      const orig = b.textContent;
+      b.textContent = '✓ Copied!';
+      b.style.color = '#22c55e';
+      b.style.borderColor = 'rgba(34,197,94,0.4)';
+      setTimeout(() => { b.textContent = orig; b.style.color = ''; b.style.borderColor = ''; }, 2000);
+    });
+  }
+  function copyLink()   { copyBtn('copy-btn',  shareText(false)); }
+  function copyResult() { copyBtn('copy-btn2', shareText(true)); }
+
+  function restart() { build(); }
+
+  /* ─── INIT ─── */
+  async function init() {
+    build();
+    // Load real count in background
+    const count = await dbFetchCount();
+    realCount = count;
+    updateCrown(count);
+  }
+
+  init();
+</script>
+</body>
+</html>
